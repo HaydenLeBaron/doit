@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "262280315352",
+    "project_id": "doit-3c1d3",
+    "storage_bucket": "doit-3c1d3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:262280315352:android:5ed32672c8393ff3d772ad",
+        "android_client_info": {
+          "package_name": "com.haydenthebaron.doit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "262280315352-i5vaorjairiu6l8h0affmagintd9hp9s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.haydenthebaron.doit",
+            "certificate_hash": "c5a62c22e9bd6654c04c4614b3805e20a8efcc92"
+          }
+        },
+        {
+          "client_id": "262280315352-nl7dgurtbvf6jkj5f6mu09ttsn8al9bq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOy7-mw-EVQxTM8ZKLZ_pkhwlp5Hjh_ew"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "262280315352-nl7dgurtbvf6jkj5f6mu09ttsn8al9bq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
