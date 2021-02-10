@@ -53,7 +53,6 @@ class TodoList extends StatefulWidget {
   TodoList({Key key, @required this.taskItems}) : super(key: key);
 
   List<TaskItem> taskItems;
-  ListView listView;
 
   @override
   _TodoListState createState() => _TodoListState();
@@ -62,10 +61,14 @@ class TodoList extends StatefulWidget {
 class _TodoListState extends State<TodoList> {
   @override
   Widget build(BuildContext context) {
-    widget.listView = ListView(children: widget.taskItems);
     return Scaffold(
-      body: widget.listView,
       //body: ListView(children: widget.taskItems),
+      body: ListView.builder(
+        itemCount: widget.taskItems.length,
+        itemBuilder: (BuildContext ctxt, int idx) {
+          return widget.taskItems[idx];
+        },
+      ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Theme.of(context).primaryColor,
         child: Icon(
@@ -78,8 +81,8 @@ class _TodoListState extends State<TodoList> {
               isChecked: false,
               titleText: "New Item!",
             ));
-            widget.listView = ListView(children: widget.taskItems);
-            widget.listView.build(context);
+            //widget.listView = ListView(children: widget.taskItems);
+            //widget.listView.build(context);
             print("FAB pressed");
             print(widget.taskItems);
           });
