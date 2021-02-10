@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
           // or simply save your changes to "hot reload" in a Flutter IDE).
           // Notice that the counter didn't reset back to zero; the application
           // is not restarted.
-          primaryColor: Colors.blue,
+          primaryColor: Colors.deepPurple,
           accentColor: Colors.white,
         ),
         home: HomePage());
@@ -33,6 +33,27 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: Drawer(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(16, 90, 16, 48),
+          child: Column(
+            children: [
+              FlatButton(
+                onPressed: () {},
+                child: Text("Drawer Item 1"),
+                color: Theme.of(context).primaryColor,
+                textColor: Colors.white,
+              ),
+              FlatButton(
+                onPressed: () {},
+                child: Text("Drawer Item 2"),
+                color: Theme.of(context).primaryColor,
+                textColor: Colors.white,
+              ),
+            ],
+          ),
+        ),
+      ),
       appBar: AppBar(
           title: Text("To Do"),
           backgroundColor: Theme.of(context).primaryColor),
@@ -163,7 +184,14 @@ class _TaskItemState extends State<TaskItem> {
           },
         ),
         tileColor: Theme.of(context).accentColor,
-        title: Text(widget.titleText),
+        title: EditableText(
+          maxLines: 1,
+          controller: TextEditingController(text: widget.titleText),
+          cursorColor: Theme.of(context).primaryColor,
+          backgroundCursorColor: Colors.orange,
+          style: TextStyle(color: Colors.black),
+          focusNode: FocusNode(),
+        ),
         onLongPress: () {}, // TODO: Implement move item on long-press (3)
       ),
     );
