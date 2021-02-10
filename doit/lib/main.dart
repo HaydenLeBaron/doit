@@ -36,80 +36,99 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
           title: Text("To Do"),
           backgroundColor: Theme.of(context).primaryColor),
-      body: TodoList(),
+      body: TodoList(taskItems: [
+        TaskItem(titleText: "Buy milk", isChecked: true),
+        TaskItem(titleText: "Do math homework", isChecked: false),
+        TaskItem(titleText: "Take out trash", isChecked: true),
+        TaskItem(
+            titleText:
+                "asdf asd f asd f asd fa sd fas df asd f ads f asd f asdf  asd f",
+            isChecked: true),
+      ]),
+    );
+  }
+}
+
+class TodoList extends StatefulWidget {
+  TodoList({Key key, @required this.taskItems}) : super(key: key);
+
+  List<TaskItem> taskItems;
+  ListView listView;
+
+  @override
+  _TodoListState createState() => _TodoListState();
+}
+
+class _TodoListState extends State<TodoList> {
+  @override
+  Widget build(BuildContext context) {
+    widget.listView = ListView(children: widget.taskItems);
+    return Scaffold(
+      body: widget.listView,
+      //body: ListView(children: widget.taskItems),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Theme.of(context).primaryColor,
         child: Icon(
           Icons.add,
           color: Theme.of(context).accentColor,
         ),
-        onPressed: () => {}, // TODO: implement onpressed function
+        onPressed: () {
+          setState(() {
+            widget.taskItems.add(TaskItem(
+              isChecked: false,
+              titleText: "New Item!",
+            ));
+            widget.listView = ListView(children: widget.taskItems);
+            widget.listView.build(context);
+            print("FAB pressed");
+            print(widget.taskItems);
+          });
+        }, // TODO: implement onpressed function
       ),
     );
   }
 }
 
-class TodoList extends StatelessWidget {
-  const TodoList({Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: ListView(
-        children: [
-          TaskItem(titleText: "Buy milk", isChecked: true),
-          TaskItem(titleText: "Do math homework", isChecked: false),
-          TaskItem(titleText: "Take out trash", isChecked: true),
-          TaskItem(titleText: "Take out trash", isChecked: true),
-          TaskItem(titleText: "Take out trash", isChecked: true),
-          TaskItem(titleText: "Take out trash", isChecked: true),
-          TaskItem(titleText: "Take out trash", isChecked: true),
-          TaskItem(titleText: "Take out trash", isChecked: true),
-          TaskItem(titleText: "Take out trash", isChecked: true),
-          TaskItem(titleText: "Take out trash", isChecked: true),
-          TaskItem(titleText: "Take out trash", isChecked: true),
-          TaskItem(titleText: "Take out trash", isChecked: true),
-          TaskItem(titleText: "Take out trash", isChecked: true),
-          TaskItem(titleText: "Take out trash", isChecked: true),
-          TaskItem(titleText: "Take out trash", isChecked: true),
-          TaskItem(titleText: "Take out trash", isChecked: true),
-          TaskItem(titleText: "Take out trash", isChecked: true),
-          TaskItem(titleText: "Take out trash", isChecked: true),
-          TaskItem(titleText: "Take out trash", isChecked: true),
-          TaskItem(titleText: "Take out trash", isChecked: true),
-          TaskItem(titleText: "Take out trash", isChecked: true),
-          TaskItem(titleText: "Take out trash", isChecked: true),
-          TaskItem(titleText: "Take out trash", isChecked: true),
-        ],
-      ),
-    );
-  }
-}
-
-class TaskItem extends StatelessWidget {
-  const TaskItem({Key key, @required this.titleText, @required this.isChecked})
+class TaskItem extends StatefulWidget {
+  TaskItem({Key key, @required this.titleText, @required this.isChecked})
       : super(key: key);
 
-  final String titleText;
-  final bool isChecked;
+  String titleText;
+  bool isChecked;
+  @override
+  _TaskItemState createState() => _TaskItemState();
+}
 
+class _TaskItemState extends State<TaskItem> {
   @override
   Widget build(BuildContext context) {
     return Container(
       child: GestureDetector(
         child: ListTile(
           leading: GestureDetector(
-            child: Icon(this.isChecked
-                ? Icons.check_box
-                : Icons.check_box_outline_blank),
-            onTap: () => {}, // TODO: Implement check/uncheck on tap (1)
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Icon(
+                widget.isChecked
+                    ? Icons.check_box
+                    : Icons.check_box_outline_blank,
+                size: 26,
+              ),
+            ),
+            onTap: () {
+              setState(() {
+                widget.isChecked = !widget.isChecked;
+              });
+
+              // TODO: implement backend logic
+            },
           ),
           tileColor: Theme.of(context).accentColor,
-          title: Text(this.titleText),
-          onLongPress: () => {}, // TODO: Implement move item on long-press (3)
+          title: Text(widget.titleText),
+          onLongPress: () {}, // TODO: Implement move item on long-press (3)
         ),
-        onHorizontalDragEnd: (DragEndDetails details) =>
-            {}, // TODO: Implement delete item on horizontal drag (2)
+        onHorizontalDragEnd: (DragEndDetails
+            details) {}, // TODO: Implement delete item on horizontal drag (2)
       ),
     );
   }
