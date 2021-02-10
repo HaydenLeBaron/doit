@@ -62,11 +62,36 @@ class _TodoListState extends State<TodoList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //body: ListView(children: widget.taskItems),
       body: ListView.builder(
         itemCount: widget.taskItems.length,
         itemBuilder: (BuildContext ctxt, int idx) {
-          return widget.taskItems[idx];
+          final taskItem = widget.taskItems[idx];
+          return Dismissible(
+            background: Container(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 24, 0),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                color: Colors.red),
+            key: Key(taskItem.id.toString()),
+            onDismissed: (direction) {
+              setState(() {
+                widget.taskItems.removeAt(idx);
+              });
+
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text("Task deleted"),
+                duration: Duration(milliseconds: 300),
+              ));
+            },
+            child: taskItem,
+          );
         },
       ),
       floatingActionButton: FloatingActionButton(
@@ -81,8 +106,6 @@ class _TodoListState extends State<TodoList> {
               isChecked: false,
               titleText: "New Item!",
             ));
-            //widget.listView = ListView(children: widget.taskItems);
-            //widget.listView.build(context);
             print("FAB pressed");
             print(widget.taskItems);
           });
@@ -93,11 +116,25 @@ class _TodoListState extends State<TodoList> {
 }
 
 class TaskItem extends StatefulWidget {
-  TaskItem({Key key, @required this.titleText, @required this.isChecked})
-      : super(key: key);
+  /* Used to new `id`s*/
+  static int totalIds;
+
+  /* Each TaskItem has a unique numeric `id`, to be used as a key. */
+  int id;
 
   String titleText;
   bool isChecked;
+
+  TaskItem({Key key, @required this.titleText, @required this.isChecked})
+      : super(key: key) {
+    if (TaskItem.totalIds == null) {
+      TaskItem.totalIds = 0;
+    }
+
+    this.id = TaskItem.totalIds;
+    TaskItem.totalIds += 1;
+  }
+
   @override
   _TaskItemState createState() => _TaskItemState();
 }
@@ -106,32 +143,28 @@ class _TaskItemState extends State<TaskItem> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: GestureDetector(
-        child: ListTile(
-          leading: GestureDetector(
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Icon(
-                widget.isChecked
-                    ? Icons.check_box
-                    : Icons.check_box_outline_blank,
-                size: 26,
-              ),
+      child: ListTile(
+        leading: GestureDetector(
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Icon(
+              widget.isChecked
+                  ? Icons.check_box
+                  : Icons.check_box_outline_blank,
+              size: 26,
             ),
-            onTap: () {
-              setState(() {
-                widget.isChecked = !widget.isChecked;
-              });
-
-              // TODO: implement backend logic
-            },
           ),
-          tileColor: Theme.of(context).accentColor,
-          title: Text(widget.titleText),
-          onLongPress: () {}, // TODO: Implement move item on long-press (3)
+          onTap: () {
+            setState(() {
+              widget.isChecked = !widget.isChecked;
+            });
+
+            // TODO: implement backend logic
+          },
         ),
-        onHorizontalDragEnd: (DragEndDetails
-            details) {}, // TODO: Implement delete item on horizontal drag (2)
+        tileColor: Theme.of(context).accentColor,
+        title: Text(widget.titleText),
+        onLongPress: () {}, // TODO: Implement move item on long-press (3)
       ),
     );
   }
