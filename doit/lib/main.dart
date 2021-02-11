@@ -80,6 +80,9 @@ class TodoList extends StatefulWidget {
 }
 
 class _TodoListState extends State<TodoList> {
+  final _formKey = GlobalKey<FormState>();
+  final descriptionController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -132,7 +135,6 @@ class _TodoListState extends State<TodoList> {
           // );
 
           // Input task
-          var form = CreateTaskForm();
           showModalBottomSheet<void>(
             context: context,
             builder: (BuildContext context) {
@@ -140,34 +142,68 @@ class _TodoListState extends State<TodoList> {
                 height: 1000,
                 color: Theme.of(context).accentColor,
                 child: Center(
-                  // child: Column(
-                  //   mainAxisAlignment: MainAxisAlignment.center,
-                  //   mainAxisSize: MainAxisSize.min,
-                  //   children: <Widget>[
-                  //     const Text('Modal BottomSheet'),
-                  //     ElevatedButton(
-                  //       child: const Text('Close BottomSheet'),
-                  //       onPressed: () => Navigator.pop(context),
-                  //     )
-                  //   ],
-                  // ),
-                  child: form,
+                  // CREATE TASK FORM
+                  child: Scaffold(
+                    body: Form(
+                      key: _formKey,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Flexible(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                              child: TextFormField(
+                                controller: descriptionController,
+                                autofocus: true,
+                                decoration: const InputDecoration(
+                                  hintText: "Task Description",
+                                ),
+                                validator: (value) {
+                                  if (value.isEmpty) {
+                                    return "Please enter some text";
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ),
+                          FlatButton(
+                            //color: Theme.of(context).accentColor,
+                            minWidth: 30,
+                            onPressed: () {
+                              // Validate will return true if the form is valid, or false if
+                              // the form is invalid.
+                              if (_formKey.currentState.validate()) {
+                                // Process data.
+                                setState(() {
+                                  // Create new task item
+                                  setState(() {
+                                    widget.taskItems.add(
+                                      TaskItem(
+                                        isChecked: false,
+                                        titleText: descriptionController.text,
+                                      ),
+                                    );
+                                    descriptionController.text = "";
+                                  });
+                                });
+                                Navigator.pop(context);
+                              }
+                            },
+                            child: Icon(
+                              Icons.arrow_right_alt,
+                              size: 35,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               );
             },
           );
-
-          // Create new task item
-          setState(() {
-            widget.taskItems.add(
-              TaskItem(
-                isChecked: false,
-                titleText: form.description,
-              ),
-            );
-            print("FAB pressed");
-            print(widget.taskItems);
-          });
         }, // TODO: implement onpressed function
       ),
     );
@@ -231,72 +267,6 @@ class _TaskItemState extends State<TaskItem> {
           focusNode: FocusNode(),
         ),
         onLongPress: () {}, // TODO: Implement move item on long-press (3)
-      ),
-    );
-  }
-}
-
-class CreateTaskForm extends StatefulWidget {
-  CreateTaskForm({Key key}) : super(key: key);
-
-  String description = "";
-
-  @override
-  _CreateTaskFormState createState() => _CreateTaskFormState();
-}
-
-class _CreateTaskFormState extends State<CreateTaskForm> {
-  final _formKey = GlobalKey<FormState>();
-  final descriptionController = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Form(
-        key: _formKey,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Flexible(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                child: TextFormField(
-                  controller: descriptionController,
-                  autofocus: true,
-                  decoration: const InputDecoration(
-                    hintText: "Task Description",
-                  ),
-                  validator: (value) {
-                    if (value.isEmpty) {
-                      return "Please enter some text";
-                    }
-                    return null;
-                  },
-                ),
-              ),
-            ),
-            FlatButton(
-              //color: Theme.of(context).accentColor,
-              minWidth: 30,
-              onPressed: () {
-                // Validate will return true if the form is valid, or false if
-                // the form is invalid.
-                if (_formKey.currentState.validate()) {
-                  // Process data.
-                  setState(() {
-                    widget.description = descriptionController.text;
-                  });
-                  Navigator.pop(context);
-                }
-              },
-              child: Icon(
-                Icons.arrow_right_alt,
-                size: 35,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
