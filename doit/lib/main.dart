@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
           // or simply save your changes to "hot reload" in a Flutter IDE).
           // Notice that the counter didn't reset back to zero; the application
           // is not restarted.
-          primaryColor: Colors.deepPurple,
+          primaryColor: Colors.blueGrey,
           accentColor: Colors.white,
         ),
         home: HomePage());
@@ -32,40 +32,42 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: Drawer(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(16, 90, 16, 48),
-          child: Column(
-            children: [
-              FlatButton(
-                onPressed: () {},
-                child: Text("Drawer Item 1"),
-                color: Theme.of(context).primaryColor,
-                textColor: Colors.white,
-              ),
-              FlatButton(
-                onPressed: () {},
-                child: Text("Drawer Item 2"),
-                color: Theme.of(context).primaryColor,
-                textColor: Colors.white,
-              ),
-            ],
+    return SafeArea(
+      child: Scaffold(
+        drawer: Drawer(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(16, 90, 16, 48),
+            child: Column(
+              children: [
+                FlatButton(
+                  onPressed: () {},
+                  child: Text("Drawer Item 1"),
+                  color: Theme.of(context).primaryColor,
+                  textColor: Colors.white,
+                ),
+                FlatButton(
+                  onPressed: () {},
+                  child: Text("Drawer Item 2"),
+                  color: Theme.of(context).primaryColor,
+                  textColor: Colors.white,
+                ),
+              ],
+            ),
           ),
         ),
+        appBar: AppBar(
+            title: Text("To Do"),
+            backgroundColor: Theme.of(context).primaryColor),
+        body: TodoList(taskItems: [
+          TaskItem(titleText: "Buy milk", isChecked: true),
+          TaskItem(titleText: "Do math homework", isChecked: false),
+          TaskItem(titleText: "Take out trash", isChecked: true),
+          TaskItem(
+              titleText:
+                  "asdf asd f asd f asd fa sd fas df asd f ads f asd f asdf  asd f",
+              isChecked: true),
+        ]),
       ),
-      appBar: AppBar(
-          title: Text("To Do"),
-          backgroundColor: Theme.of(context).primaryColor),
-      body: TodoList(taskItems: [
-        TaskItem(titleText: "Buy milk", isChecked: true),
-        TaskItem(titleText: "Do math homework", isChecked: false),
-        TaskItem(titleText: "Take out trash", isChecked: true),
-        TaskItem(
-            titleText:
-                "asdf asd f asd f asd fa sd fas df asd f ads f asd f asdf  asd f",
-            isChecked: true),
-      ]),
     );
   }
 }
@@ -115,6 +117,8 @@ class _TodoListState extends State<TodoList> {
           );
         },
       ),
+
+      // TODO: implement nicer "create task" form.
       floatingActionButton: FloatingActionButton(
         backgroundColor: Theme.of(context).primaryColor,
         child: Icon(
@@ -122,11 +126,47 @@ class _TodoListState extends State<TodoList> {
           color: Theme.of(context).accentColor,
         ),
         onPressed: () {
+          // Open create task item form
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //       builder: (BuildContext context) => CreateTaskForm()),
+          // );
+
+          // Input task
+          var form = CreateTaskForm();
+          showModalBottomSheet<void>(
+            context: context,
+            builder: (BuildContext context) {
+              return Container(
+                height: 1000,
+                color: Theme.of(context).accentColor,
+                child: Center(
+                  // child: Column(
+                  //   mainAxisAlignment: MainAxisAlignment.center,
+                  //   mainAxisSize: MainAxisSize.min,
+                  //   children: <Widget>[
+                  //     const Text('Modal BottomSheet'),
+                  //     ElevatedButton(
+                  //       child: const Text('Close BottomSheet'),
+                  //       onPressed: () => Navigator.pop(context),
+                  //     )
+                  //   ],
+                  // ),
+                  child: form,
+                ),
+              );
+            },
+          );
+
+          // Create new task item
           setState(() {
-            widget.taskItems.add(TaskItem(
-              isChecked: false,
-              titleText: "New Item!",
-            ));
+            widget.taskItems.add(
+              TaskItem(
+                isChecked: false,
+                titleText: form.description,
+              ),
+            );
             print("FAB pressed");
             print(widget.taskItems);
           });
@@ -193,6 +233,72 @@ class _TaskItemState extends State<TaskItem> {
           focusNode: FocusNode(),
         ),
         onLongPress: () {}, // TODO: Implement move item on long-press (3)
+      ),
+    );
+  }
+}
+
+class CreateTaskForm extends StatefulWidget {
+  CreateTaskForm({Key key}) : super(key: key);
+
+  String description = "";
+
+  @override
+  _CreateTaskFormState createState() => _CreateTaskFormState();
+}
+
+class _CreateTaskFormState extends State<CreateTaskForm> {
+  final _formKey = GlobalKey<FormState>();
+  final descriptionController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Form(
+        key: _formKey,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                child: TextFormField(
+                  controller: descriptionController,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    hintText: "Task Description",
+                  ),
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return "Please enter some text";
+                    }
+                    return null;
+                  },
+                ),
+              ),
+            ),
+            FlatButton(
+              //color: Theme.of(context).accentColor,
+              minWidth: 30,
+              onPressed: () {
+                // Validate will return true if the form is valid, or false if
+                // the form is invalid.
+                if (_formKey.currentState.validate()) {
+                  // Process data.
+                  setState(() {
+                    widget.description = descriptionController.text;
+                  });
+                  Navigator.pop(context);
+                }
+              },
+              child: Icon(
+                Icons.arrow_right_alt,
+                size: 35,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
