@@ -32,42 +32,40 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        drawer: Drawer(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(16, 90, 16, 48),
-            child: Column(
-              children: [
-                FlatButton(
-                  onPressed: () {},
-                  child: Text("Drawer Item 1"),
-                  color: Theme.of(context).primaryColor,
-                  textColor: Colors.white,
-                ),
-                FlatButton(
-                  onPressed: () {},
-                  child: Text("Drawer Item 2"),
-                  color: Theme.of(context).primaryColor,
-                  textColor: Colors.white,
-                ),
-              ],
-            ),
+    return Scaffold(
+      drawer: Drawer(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(16, 90, 16, 48),
+          child: Column(
+            children: [
+              FlatButton(
+                onPressed: () {},
+                child: Text("Drawer Item 1"),
+                color: Theme.of(context).primaryColor,
+                textColor: Colors.white,
+              ),
+              FlatButton(
+                onPressed: () {},
+                child: Text("Drawer Item 2"),
+                color: Theme.of(context).primaryColor,
+                textColor: Colors.white,
+              ),
+            ],
           ),
         ),
-        appBar: AppBar(
-            title: Text("To Do"),
-            backgroundColor: Theme.of(context).primaryColor),
-        body: TodoList(taskItems: [
-          TaskItem(titleText: "Buy milk", isChecked: true),
-          TaskItem(titleText: "Do math homework", isChecked: false),
-          TaskItem(titleText: "Take out trash", isChecked: true),
-          TaskItem(
-              titleText:
-                  "asdf asd f asd f asd fa sd fas df asd f ads f asd f asdf  asd f",
-              isChecked: true),
-        ]),
       ),
+      appBar: AppBar(
+          title: Text("To Do"),
+          backgroundColor: Theme.of(context).primaryColor),
+      body: TodoList(taskItems: [
+        TaskItem(titleText: "Buy milk", isChecked: true),
+        TaskItem(titleText: "Do math homework", isChecked: false),
+        TaskItem(titleText: "Take out trash", isChecked: true),
+        TaskItem(
+            titleText:
+                "asdf asd f asd f asd fa sd fas df asd f ads f asd f asdf  asd f",
+            isChecked: true),
+      ]),
     );
   }
 }
