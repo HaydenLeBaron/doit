@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:doit/shared/task_item.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doit/shared/globals.dart';
+import 'dart:math';
 
 class TodoList extends StatefulWidget {
   TodoList({Key key, @required this.taskItems}) : super(key: key);
@@ -17,38 +20,52 @@ class _TodoListState extends State<TodoList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView.builder(
-        itemCount: widget.taskItems.length,
-        itemBuilder: (BuildContext ctxt, int idx) {
-          final taskItem = widget.taskItems[idx];
-          return Dismissible(
-            background: Container(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 24, 0),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Icon(
-                      Icons.delete,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                color: Colors.red),
-            key: Key(taskItem.id.toString()),
-            onDismissed: (direction) {
-              setState(() {
-                widget.taskItems.removeAt(idx);
-              });
+      body: StreamBuilder(
+          //stream: FirebaseFirestore.instance.collection('tasks').snapshots(),
+          stream: FirebaseFirestore.instance.collection("tasks").snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return const Text('Loading...');
+            return ListView.builder(
+              itemCount: snapshot.data.docs.length,
+              itemBuilder: (BuildContext context, int idx) {
+                var document = snapshot.data.docs[idx];
+                //final taskItem = widget.taskItems[idx]; // TODO: BKMRK DELME
+                print("document.toString() == " + document.toString());
+                return Dismissible(
+                  background: Container(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 0, 24, 0),
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Icon(
+                            Icons.delete,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      color: Colors.red),
+                  //key: Key(taskItem.id.toString()), // TODO: implement key field in task in db
+                  key: Key(Random()
+                      .nextInt(10000)
+                      .toString()), // TODO: generate unique, deterministic keys (maybe use the document IDs as keys)
+                  onDismissed: (direction) {
+                    setState(() {
+                      widget.taskItems.removeAt(idx);
+                    });
 
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text("Task deleted"),
-                duration: Duration(milliseconds: 300),
-              ));
-            },
-            child: taskItem,
-          );
-        },
-      ),
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text("Task deleted"),
+                      duration: Duration(milliseconds: 300),
+                    ));
+                  },
+                  child: ListTile(title: Text(document.toString())),
+                  // TODO: generate actual list tile, with proper fields
+                  // child: TaskItem(
+                  //     isChecked: false, titleText: document.ToString()),
+                );
+              },
+            );
+          }),
       floatingActionButton: FloatingActionButton(
         // TODO: refactor so that the FAB is part of the screen and not the todolist
         backgroundColor: Theme.of(context).primaryColor,
