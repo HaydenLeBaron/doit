@@ -58,7 +58,9 @@ class _TodoListState extends State<TodoList> {
                       duration: Duration(milliseconds: 300),
                     ));
                   },
-                  child: ListTile(title: Text(document.toString())),
+                  child: ListTile(
+                      title: Text(document['description']),
+                      tileColor: Theme.of(context).accentColor),
                   // TODO: generate actual list tile, with proper fields
                   // child: TaskItem(
                   //     isChecked: false, titleText: document.ToString()),
