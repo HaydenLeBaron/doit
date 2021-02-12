@@ -59,6 +59,28 @@ class _TodoListState extends State<TodoList> {
                     ));
                   },
                   child: ListTile(
+                      leading: GestureDetector(
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Icon(
+                            document['isChecked']
+                                ? Icons.check_box
+                                : Icons.check_box_outline_blank,
+                            size: 26,
+                          ),
+                        ),
+                        onTap: () {
+                          // https://www.youtube.com/watch?v=DqJ_KjFzL9I
+                          FirebaseFirestore.instance
+                              .runTransaction((transaction) async {
+                            DocumentSnapshot freshSnap =
+                                await transaction.get(document.reference);
+                            await transaction.update(freshSnap.reference, {
+                              'isChecked': !freshSnap['isChecked'],
+                            });
+                          });
+                        },
+                      ),
                       title: Text(document['description']),
                       tileColor: Theme.of(context).accentColor),
                   // TODO: generate actual list tile, with proper fields
