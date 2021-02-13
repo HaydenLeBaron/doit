@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:doit/shared/task_item.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:doit/shared/globals.dart';
-import 'dart:math';
 
 class TodoList extends StatefulWidget {
   TodoList({Key key, @required this.taskItems}) : super(key: key);
@@ -44,13 +42,13 @@ class _TodoListState extends State<TodoList> {
                         ),
                       ),
                       color: Colors.red),
-                  //key: Key(taskItem.id.toString()), // TODO: implement key field in task in db
-                  key: Key(Random()
-                      .nextInt(10000)
-                      .toString()), // TODO: generate unique, deterministic keys (maybe use the document IDs as keys)
-                  onDismissed: (direction) {
-                    setState(() {
-                      widget.taskItems.removeAt(idx);
+                  key: Key(
+                      snapshot.data.docs[idx].reference.hashCode.toString()),
+                  onDismissed: (direction) async {
+                    await FirebaseFirestore.instance
+                        .runTransaction((transaction) async {
+                      await transaction
+                          .delete(snapshot.data.docs[idx].reference);
                     });
 
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -83,9 +81,6 @@ class _TodoListState extends State<TodoList> {
                       ),
                       title: Text(document['description']),
                       tileColor: Theme.of(context).accentColor),
-                  // TODO: generate actual list tile, with proper fields
-                  // child: TaskItem(
-                  //     isChecked: false, titleText: document.ToString()),
                 );
               },
             );
@@ -131,35 +126,48 @@ class _TodoListState extends State<TodoList> {
                               ),
                             ),
                           ),
-                          FlatButton(
-                            //color: Theme.of(context).accentColor,
-                            minWidth: 30,
-                            onPressed: () {
-                              // Validate will return true if the form is valid, or false if
-                              // the form is invalid.
-                              if (_formKey.currentState.validate()) {
-                                // Process data.
-                                setState(() {
-                                  // Create new task item
-                                  setState(() {
-                                    widget.taskItems.add(
-                                      TaskItem(
-                                        isChecked: false,
-                                        titleText: descriptionController.text,
-                                      ),
-                                    );
-                                    descriptionController.text = "";
-                                  });
-                                });
-                                Navigator.pop(context);
-                              }
-                            },
-                            child: Icon(
-                              Icons.arrow_right_alt,
-                              size: 35,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                          ),
+
+                          // Finish creating task button
+                          StreamBuilder(
+                              stream: FirebaseFirestore.instance
+                                  .collection("tasks")
+                                  .snapshots(),
+                              builder: (context, snapshot) {
+                                return FlatButton(
+                                  //color: Theme.of(context).accentColor,
+                                  minWidth: 30,
+                                  onPressed: () async {
+                                    // Then, later in a transaction:
+
+                                    // Validate will return true if the form is valid, or false if
+                                    // the form is invalid.
+                                    if (_formKey.currentState.validate()) {
+                                      await FirebaseFirestore.instance
+                                          .runTransaction((transaction) async {
+                                        // Create a reference to a document that doesn't exist yet, it has a random id
+                                        final newDocRef =
+                                            await FirebaseFirestore.instance
+                                                .collection('tasks')
+                                                .doc();
+                                        // Then, later in a transaction:
+                                        transaction.set(newDocRef, {
+                                          'description':
+                                              descriptionController.text,
+                                          'isChecked': false
+                                        });
+                                      });
+
+                                      descriptionController.text = "";
+                                      await Navigator.pop(context);
+                                    }
+                                  },
+                                  child: Icon(
+                                    Icons.arrow_right_alt,
+                                    size: 35,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                );
+                              }),
                         ],
                       ),
                     ),

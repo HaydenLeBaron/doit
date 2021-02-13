@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// TODO: FIXME: right now TaskItem objects aren't being used by TodoList. Either refactor or delete this object
 class TaskItem extends StatefulWidget {
   /* Used to new `id`s*/
   static int totalIds;

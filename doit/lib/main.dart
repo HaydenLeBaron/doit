@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:doit/screens/home_screen.dart';
-import 'package:doit/shared/globals.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 void main() {
@@ -22,7 +20,6 @@ class App extends StatelessWidget {
 
         // Once complete, show your application
         if (snapshot.connectionState == ConnectionState.done) {
-          Globals.initGlobals();
           return DoitApp();
         }
 
