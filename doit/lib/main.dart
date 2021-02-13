@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:doit/screens/home_screen.dart';
+import 'package:doit/screens/tasks_screen.dart';
 import 'package:doit/screens/loading_screen.dart';
 import 'package:doit/screens/something_went_wrong_screen.dart';
 
@@ -28,7 +28,7 @@ class DoitApp extends StatelessWidget {
           }
           // Once complete, start to app
           else if (snapshot.connectionState == ConnectionState.done) {
-            return HomeScreen();
+            return TasksScreen();
           }
           // Otherwise, show something while waiting for initialization to complete
           else {

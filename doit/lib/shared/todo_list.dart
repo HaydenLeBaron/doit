@@ -59,6 +59,8 @@ class TaskTile extends StatelessWidget {
           .hashCode
           .toString()),
       child: ListTile(title: Text(this.description), leading: Checkbox()),
+      onDismissed: (DismissDirection direction) =>
+          onTaskTileDismissed(context, direction),
       background: Container(
         padding: const EdgeInsets.fromLTRB(0, 0, 24, 0),
         alignment: Alignment.centerRight,
@@ -70,6 +72,21 @@ class TaskTile extends StatelessWidget {
       ),
     );
   }
+}
+
+// TODO: factor out into another file
+void onTaskTileDismissed(
+    BuildContext context, DismissDirection direction) async {
+  await FirebaseFirestore.instance.runTransaction((transaction) async {
+    await transaction.delete(Provider.of<QuerySnapshot>(context, listen: false)
+        .docs[Provider.of<int>(context, listen: false)]
+        .reference);
+  });
+
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    content: Text("Task deleted"),
+    duration: Duration(milliseconds: 300),
+  ));
 }
 
 class Checkbox extends StatelessWidget {
@@ -112,6 +129,8 @@ void onTapCheckbox(BuildContext context) {
     });
   });
 }
+
+// TODO: BKMRK: Implement ability to add new by pressing the FAB. Do this in tasks_screen.dart, using provider
 
 // Old code below //////////////////////////////////////////////////////
 
