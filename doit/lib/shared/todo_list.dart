@@ -53,11 +53,7 @@ class TaskTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dismissible(
       // Can swipe right to dismiss TaskTile
-      key: Key(Provider.of<QuerySnapshot>(context)
-          .docs[Provider.of<int>(context)] // .docs[idx]
-          .reference
-          .hashCode
-          .toString()),
+      key: Key(getCurrDoc(context).reference.hashCode.toString()),
       child: ListTile(title: Text(this.description), leading: Checkbox()),
       onDismissed: (DismissDirection direction) =>
           onTaskTileDismissed(context, direction),
@@ -78,9 +74,8 @@ class TaskTile extends StatelessWidget {
 void onTaskTileDismissed(
     BuildContext context, DismissDirection direction) async {
   await FirebaseFirestore.instance.runTransaction((transaction) async {
-    await transaction.delete(Provider.of<QuerySnapshot>(context, listen: false)
-        .docs[Provider.of<int>(context, listen: false)]
-        .reference);
+    await transaction.delete(
+        getCurrDoc(context, qsnaplisten: false, idxlisten: false).reference);
   });
 
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -100,9 +95,7 @@ class Checkbox extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Icon(
-          Provider.of<QuerySnapshot>(context)
-                      .docs[Provider.of<int>(context, listen: false)]
-                  ['isChecked'] // Get currentdocument.isChecked
+          getCurrDoc(context, idxlisten: false)['isChecked']
               ? Icons.check_box
               : Icons.check_box_outline_blank,
           size: 26,
@@ -121,13 +114,18 @@ void onTapCheckbox(BuildContext context) {
   // https://www.youtube.com/watch?v=DqJ_KjFzL9I
   FirebaseFirestore.instance.runTransaction((transaction) async {
     DocumentSnapshot freshSnap = await transaction.get(
-        Provider.of<QuerySnapshot>(context, listen: false)
-            .docs[Provider.of<int>(context, listen: false)]
-            .reference);
+        getCurrDoc(context, idxlisten: false, qsnaplisten: false).reference);
     await transaction.update(freshSnap.reference, {
       'isChecked': !freshSnap['isChecked'],
     });
   });
+}
+
+/// Auxillary function for getting the current document (using the QuesrySnapshot and idx)
+QueryDocumentSnapshot getCurrDoc(BuildContext context,
+    {bool qsnaplisten = true, bool idxlisten = true}) {
+  return Provider.of<QuerySnapshot>(context, listen: qsnaplisten)
+      .docs[Provider.of<int>(context, listen: idxlisten)];
 }
 
 // TODO: BKMRK: Implement ability to add new by pressing the FAB. Do this in tasks_screen.dart, using provider
