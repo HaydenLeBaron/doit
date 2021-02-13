@@ -32,6 +32,8 @@ class TaskListBuilder extends StatelessWidget {
               idx]; // FIXME: this is breifly null and causes an error screen briefly (I think)
           return TaskTile(
             description: tasksDoc['description'],
+            isChecked: tasksDoc['isChecked'],
+            idx: idx,
           );
         },
       ),
@@ -40,19 +42,81 @@ class TaskListBuilder extends StatelessWidget {
 }
 
 class TaskTile extends StatelessWidget {
-  const TaskTile({Key key, this.description}) : super(key: key);
+  const TaskTile({Key key, this.description, this.isChecked, this.idx})
+      : super(key: key);
 
   final String description;
+  final bool isChecked;
+  final int idx;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: ListTile(
-        title: Text(description),
+    return Provider<int>(
+      create: (context) => this.idx,
+      child: Dismissible(
+        // Can swipe right to dismiss TaskTile
+        key: Key(Provider.of<QuerySnapshot>(context)
+            .docs[this.idx]
+            .reference
+            .hashCode
+            .toString()),
+        child: ListTile(title: Text(this.description), leading: Checkbox()),
+        background: Container(
+          padding: const EdgeInsets.fromLTRB(0, 0, 24, 0),
+          alignment: Alignment.centerRight,
+          child: Icon(
+            Icons.delete,
+            color: Colors.white,
+          ),
+          color: Colors.red,
+        ),
       ),
     );
   }
 }
+
+class Checkbox extends StatelessWidget {
+  const Checkbox({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    var gestureDetector = GestureDetector(
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Icon(
+          Provider.of<QuerySnapshot>(context)
+                      .docs[Provider.of<int>(context, listen: false)]
+                  ['isChecked'] // Get currentcocument.isChecked
+              ? Icons.check_box
+              : Icons.check_box_outline_blank,
+          size: 26,
+        ),
+      ),
+      onTap: () => onTapCheckbox(context),
+    );
+    return Container(
+      child: gestureDetector,
+    );
+  }
+}
+
+// TODO: factor this out into a separate file
+void onTapCheckbox(BuildContext context) {
+  // https://www.youtube.com/watch?v=DqJ_KjFzL9I
+  FirebaseFirestore.instance.runTransaction((transaction) async {
+    DocumentSnapshot freshSnap = await transaction.get(
+        Provider.of<QuerySnapshot>(context, listen: false)
+            .docs[Provider.of<int>(context, listen: false)]
+            .reference);
+    await transaction.update(freshSnap.reference, {
+      'isChecked': !freshSnap['isChecked'],
+    });
+  });
+}
+
+// Old code below //////////////////////////////////////////////////////
 
 class TodoList extends StatefulWidget {
   TodoList({Key key}) : super(key: key);
