@@ -19,7 +19,7 @@ class _TodoListState extends State<TodoList> {
           //stream: FirebaseFirestore.instance.collection('tasks').snapshots(),
           stream: FirebaseFirestore.instance.collection("tasks").snapshots(),
           builder: (context, snapshot) {
-            if (!snapshot.hasData) return const Text('Loading...');
+            if (!snapshot.hasData) return const Text('TodoList Loading...');
             return ListView.builder(
               itemCount: snapshot.data.docs.length,
               itemBuilder: (BuildContext context, int idx) {

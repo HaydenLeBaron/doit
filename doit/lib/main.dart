@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:doit/screens/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(App());
@@ -15,7 +16,7 @@ class App extends StatelessWidget {
       builder: (context, snapshot) {
         // Check for errors
         if (snapshot.hasError) {
-          return Placeholder(color: Colors.red);
+          return SomethingWentWrongScreen();
         }
 
         // Once complete, show your application
@@ -24,22 +25,25 @@ class App extends StatelessWidget {
         }
 
         // Otherwise, show something whilst waiting for initialization to complete
-        return Placeholder(color: Colors.green);
+        return LoadingScreen();
       },
     );
   }
 }
 
-// class SomethingWentWrongScreen extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       child: Center(
-//         child: Text("Something went wrong..."),
-//       ),
-//     );
-//   }
-// }
+class SomethingWentWrongScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(home: Text("Something went wrong..."));
+  }
+}
+
+class LoadingScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(home: Text("App Loading..."));
+  }
+}
 
 class DoitApp extends StatelessWidget {
   // This widget is the root of your application.
