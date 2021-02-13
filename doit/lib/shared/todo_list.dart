@@ -1,5 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+
+class TaskList extends StatelessWidget {
+  const TaskList({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: StreamProvider<QuerySnapshot>(
+        create: (context) =>
+            FirebaseFirestore.instance.collection("tasks").snapshots(),
+        child: TaskListBuilder(),
+      ),
+    );
+  }
+}
+
+class TaskListBuilder extends StatelessWidget {
+  const TaskListBuilder({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: ListView.builder(
+        itemCount: Provider.of<QuerySnapshot>(context)
+            .docs
+            .length, // FIXME: this is breifly null and causes an error screen briefly (I think)
+        itemBuilder: (context, idx) {
+          var tasksDoc = Provider.of<QuerySnapshot>(context).docs[
+              idx]; // FIXME: this is breifly null and causes an error screen briefly (I think)
+          return TaskTile(
+            description: tasksDoc['description'],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class TaskTile extends StatelessWidget {
+  const TaskTile({Key key, this.description}) : super(key: key);
+
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: ListTile(
+        title: Text(description),
+      ),
+    );
+  }
+}
 
 class TodoList extends StatefulWidget {
   TodoList({Key key}) : super(key: key);
@@ -16,7 +69,6 @@ class _TodoListState extends State<TodoList> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder(
-          //stream: FirebaseFirestore.instance.collection('tasks').snapshots(),
           stream: FirebaseFirestore.instance.collection("tasks").snapshots(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) return const Text('TodoList Loading...');
