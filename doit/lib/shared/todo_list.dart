@@ -30,10 +30,12 @@ class TaskListBuilder extends StatelessWidget {
         itemBuilder: (context, idx) {
           var tasksDoc = Provider.of<QuerySnapshot>(context).docs[
               idx]; // FIXME: this is breifly null and causes an error screen briefly (I think)
-          return TaskTile(
-            description: tasksDoc['description'],
-            isChecked: tasksDoc['isChecked'],
-            idx: idx,
+          return Provider<int>(
+            create: (context) => idx,
+            child: TaskTile(
+              description: tasksDoc['description'],
+              isChecked: tasksDoc['isChecked'],
+            ),
           );
         },
       ),
@@ -42,34 +44,29 @@ class TaskListBuilder extends StatelessWidget {
 }
 
 class TaskTile extends StatelessWidget {
-  const TaskTile({Key key, this.description, this.isChecked, this.idx})
-      : super(key: key);
+  const TaskTile({Key key, this.description, this.isChecked}) : super(key: key);
 
   final String description;
   final bool isChecked;
-  final int idx;
 
   @override
   Widget build(BuildContext context) {
-    return Provider<int>(
-      create: (context) => this.idx,
-      child: Dismissible(
-        // Can swipe right to dismiss TaskTile
-        key: Key(Provider.of<QuerySnapshot>(context)
-            .docs[this.idx]
-            .reference
-            .hashCode
-            .toString()),
-        child: ListTile(title: Text(this.description), leading: Checkbox()),
-        background: Container(
-          padding: const EdgeInsets.fromLTRB(0, 0, 24, 0),
-          alignment: Alignment.centerRight,
-          child: Icon(
-            Icons.delete,
-            color: Colors.white,
-          ),
-          color: Colors.red,
+    return Dismissible(
+      // Can swipe right to dismiss TaskTile
+      key: Key(Provider.of<QuerySnapshot>(context)
+          .docs[Provider.of<int>(context)] // .docs[idx]
+          .reference
+          .hashCode
+          .toString()),
+      child: ListTile(title: Text(this.description), leading: Checkbox()),
+      background: Container(
+        padding: const EdgeInsets.fromLTRB(0, 0, 24, 0),
+        alignment: Alignment.centerRight,
+        child: Icon(
+          Icons.delete,
+          color: Colors.white,
         ),
+        color: Colors.red,
       ),
     );
   }
@@ -88,7 +85,7 @@ class Checkbox extends StatelessWidget {
         child: Icon(
           Provider.of<QuerySnapshot>(context)
                       .docs[Provider.of<int>(context, listen: false)]
-                  ['isChecked'] // Get currentcocument.isChecked
+                  ['isChecked'] // Get currentdocument.isChecked
               ? Icons.check_box
               : Icons.check_box_outline_blank,
           size: 26,
