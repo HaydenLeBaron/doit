@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:doit/shared/task_item.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TodoList extends StatefulWidget {
-  TodoList({Key key, @required this.taskItems}) : super(key: key);
-
-  List<TaskItem> taskItems;
+  TodoList({Key key}) : super(key: key);
 
   @override
   _TodoListState createState() => _TodoListState();
@@ -27,8 +24,6 @@ class _TodoListState extends State<TodoList> {
               itemCount: snapshot.data.docs.length,
               itemBuilder: (BuildContext context, int idx) {
                 var document = snapshot.data.docs[idx];
-                //final taskItem = widget.taskItems[idx]; // TODO: BKMRK DELME
-                print("document.toString() == " + document.toString());
                 return Dismissible(
                   background: Container(
                       child: Padding(

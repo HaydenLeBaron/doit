@@ -31,7 +31,7 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
           title: Text("To Do"),
           backgroundColor: Theme.of(context).primaryColor),
-      body: TodoList(taskItems: []),
+      body: TodoList(),
     );
   }
 }
