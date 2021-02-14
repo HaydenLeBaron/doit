@@ -5,11 +5,26 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 Stream<QuerySnapshot> getTasksQuerySnapshotStream(BuildContext context) =>
     FirebaseFirestore.instance.collection("tasks").snapshots();
 
-/// Delete document `docref` from the database.
-void deleteDocument(BuildContext context, DismissDirection direction,
-    DocumentReference docRef) async {
+/// Delete document `docSnap` from the database.
+void deleteDocument(BuildContext context, DocumentSnapshot docSnap) async {
   await FirebaseFirestore.instance.runTransaction((transaction) async {
-    transaction.delete(docRef);
+    transaction.delete(docSnap.reference);
+  });
+}
+
+/// Delete document `docSnap` from the `tasks` collection.
+/// and create an identical task in the `archived_tasks` collection.
+void archiveTask(BuildContext context, DocumentSnapshot docSnap) async {
+  await FirebaseFirestore.instance.runTransaction((transaction) async {
+    final newDocRef =
+        FirebaseFirestore.instance.collection('archived_tasks').doc();
+    transaction.set(newDocRef, {
+      'description': docSnap['description'],
+      'importance': docSnap['importance'],
+      'isChecked': docSnap['isChecked'],
+    });
+
+    transaction.delete(docSnap.reference);
   });
 }
 
