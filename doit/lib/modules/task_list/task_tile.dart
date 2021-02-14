@@ -55,6 +55,8 @@ class TaskCheckbox extends StatelessWidget {
           getCurrDoc(context, idxlisten: false)['isChecked']
               ? Icons.check_box
               : Icons.check_box_outline_blank,
+          color: importanceToColor(
+              getCurrDoc(context, idxlisten: false)['importance']),
           size: 26,
         ),
       ),

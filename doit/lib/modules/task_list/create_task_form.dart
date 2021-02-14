@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:doit/services/tasks_service.dart';
+import 'package:doit/modules/task_list/helpers.dart';
 
 class CreateTaskForm extends StatefulWidget {
   CreateTaskForm({Key key, @required this.formKey}) : super(key: key);
@@ -10,8 +11,17 @@ class CreateTaskForm extends StatefulWidget {
   _CreateTaskFormState createState() => _CreateTaskFormState();
 }
 
+class ImportancePickerController {
+  int importance;
+
+  ImportancePickerController(startingImportance) {
+    importance = startingImportance;
+  }
+}
+
 class _CreateTaskFormState extends State<CreateTaskForm> {
   final _taskDescController = TextEditingController();
+  final _imporancePickerController = ImportancePickerController(4);
 
   @override
   void initState() {
@@ -36,12 +46,15 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ImportancePicker(),
+          ImportancePicker(
+            controller: _imporancePickerController,
+          ),
           TaskDescField(
             taskDescController: _taskDescController,
           ),
           ConfirmCreateTaskButton(
             taskDescController: _taskDescController,
+            importancePickerController: _imporancePickerController,
             formKey: widget.formKey,
           )
         ],
@@ -51,17 +64,18 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
 }
 
 class ImportancePicker extends StatefulWidget {
-  ImportancePicker({Key key}) : super(key: key);
+  ImportancePicker({Key key, @required this.controller}) : super(key: key);
+
+  final ImportancePickerController controller;
 
   @override
   _ImportancePickerState createState() => _ImportancePickerState();
 }
 
 class _ImportancePickerState extends State<ImportancePicker> {
-  int dropdownValue = 4;
-
   @override
   Widget build(BuildContext context) {
+    int dropdownValue = widget.controller.importance;
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
       child: DropdownButton<int>(
@@ -71,7 +85,7 @@ class _ImportancePickerState extends State<ImportancePicker> {
         elevation: 16,
         onChanged: (int newValue) {
           setState(() {
-            dropdownValue = newValue;
+            widget.controller.importance = newValue;
           });
         },
         items: <int>[1, 2, 3, 4].map<DropdownMenuItem<int>>((int value) {
@@ -83,22 +97,6 @@ class _ImportancePickerState extends State<ImportancePicker> {
         }).toList(),
       ),
     );
-  }
-}
-
-Color importanceToColor(int val) {
-  switch (val) {
-    case 1:
-      return Colors.red;
-      break;
-    case 2:
-      return Colors.yellow;
-      break;
-    case 3:
-      return Colors.blue;
-      break;
-    default: // 4
-      return Colors.grey;
   }
 }
 
@@ -132,10 +130,14 @@ class TaskDescField extends StatelessWidget {
 
 class ConfirmCreateTaskButton extends StatelessWidget {
   const ConfirmCreateTaskButton(
-      {Key key, @required this.taskDescController, @required this.formKey})
+      {Key key,
+      @required this.taskDescController,
+      @required this.importancePickerController,
+      @required this.formKey})
       : super(key: key);
 
   final TextEditingController taskDescController;
+  final ImportancePickerController importancePickerController;
   final GlobalKey<FormState> formKey;
 
   @override
@@ -145,7 +147,10 @@ class ConfirmCreateTaskButton extends StatelessWidget {
       onPressed: () async {
         // If form is valid
         if (formKey.currentState.validate()) {
-          createTaskModel(taskDescController.text);
+          createTaskModel(
+            taskDescController.text,
+            importancePickerController.importance,
+          );
           Navigator.pop(context);
         }
       },
