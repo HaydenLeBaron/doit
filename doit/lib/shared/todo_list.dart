@@ -2,17 +2,60 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 
-class TaskList extends StatelessWidget {
-  const TaskList({Key key}) : super(key: key);
+class TaskListScreen extends StatelessWidget {
+  const TaskListScreen({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: StreamProvider<QuerySnapshot>(
-        create: (context) =>
-            FirebaseFirestore.instance.collection("tasks").snapshots(),
-        child: TaskListBuilder(),
+    // TODO: convert into MultiProvider pattern
+    return StreamProvider<QuerySnapshot>(
+      create: (context) =>
+          FirebaseFirestore.instance.collection("tasks").snapshots(),
+      child: Provider<GlobalKey<FormState>>(
+        create: (context) => GlobalKey<FormState>(),
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text("To Do"),
+          ),
+          body: TaskListBuilder(),
+          floatingActionButton: FABCreateTask(),
+        ),
       ),
+    );
+  }
+}
+
+class FABCreateTask extends StatelessWidget {
+  const FABCreateTask({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      backgroundColor: Theme.of(context).primaryColor,
+      child: Icon(Icons.add, color: Theme.of(context).accentColor),
+
+      // TODO: factor out onPressed
+      onPressed: () {
+        final formKey =
+            Provider.of<GlobalKey<FormState>>(context, listen: false);
+        showModalBottomSheet<void>(
+          context: context,
+          builder: (BuildContext context) {
+            return Container(
+              height: 1000,
+              color: Theme.of(context).accentColor,
+              alignment: Alignment.center,
+              child: Form(
+                key: formKey,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
