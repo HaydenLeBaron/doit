@@ -61,13 +61,30 @@ class CreateTaskForm extends StatefulWidget {
   CreateTaskForm({Key key, @required this.formKey}) : super(key: key);
 
   final formKey;
-  final taskDescController = TextEditingController();
 
   @override
   _CreateTaskFormState createState() => _CreateTaskFormState();
 }
 
 class _CreateTaskFormState extends State<CreateTaskForm> {
+  final _taskDescController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    try {
+      _taskDescController.dispose();
+      super.dispose();
+    } on FlutterError catch (e) {
+      // FIXME: This error gets thrown randomly if I try to delete tasks too fast
+      print(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -80,7 +97,7 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
               child: TextFormField(
-                controller: widget.taskDescController,
+                controller: _taskDescController,
                 autofocus: true,
                 decoration: const InputDecoration(
                   hintText: "Task Description",
@@ -109,13 +126,12 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
                       .doc();
                   // Then write to the new document
                   transaction.set(newDocRef, {
-                    'description': widget.taskDescController.text,
+                    'description': _taskDescController.text,
                     'isChecked': false
                   });
                 });
 
-                widget.taskDescController.text =
-                    ""; // TODO: dispose of controller
+                //_taskDescController.text = ""; // TODO: dispose of controller
 
                 Navigator.pop(context);
               }
