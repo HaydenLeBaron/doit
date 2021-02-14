@@ -9,8 +9,7 @@ class TaskListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO: convert into MultiProvider pattern
     return StreamProvider<QuerySnapshot>(
-      create: (context) =>
-          FirebaseFirestore.instance.collection("tasks").snapshots(),
+      create: getTasksQuerySnapshotStream,
       child: Provider<GlobalKey<FormState>>(
         create: (context) => GlobalKey<FormState>(),
         child: Scaffold(
@@ -25,6 +24,10 @@ class TaskListScreen extends StatelessWidget {
   }
 }
 
+// TODO: move to services/
+Stream<QuerySnapshot> getTasksQuerySnapshotStream(BuildContext context) =>
+    FirebaseFirestore.instance.collection("tasks").snapshots();
+
 class FABCreateTask extends StatelessWidget {
   const FABCreateTask({Key key}) : super(key: key);
 
@@ -33,8 +36,6 @@ class FABCreateTask extends StatelessWidget {
     return FloatingActionButton(
       backgroundColor: Theme.of(context).primaryColor,
       child: Icon(Icons.add, color: Theme.of(context).accentColor),
-
-      // TODO: factor out onPressed
       onPressed: () {
         final formKey =
             Provider.of<GlobalKey<FormState>>(context, listen: false);
@@ -151,14 +152,7 @@ class ConfirmCreateTaskButton extends StatelessWidget {
       onPressed: () async {
         // If form is valid
         if (formKey.currentState.validate()) {
-          await FirebaseFirestore.instance.runTransaction((transaction) async {
-            // Create a reference to a document that doesn't exist yet, it has a random id
-            final newDocRef =
-                await FirebaseFirestore.instance.collection('tasks').doc();
-            // Then write to the new document
-            transaction.set(newDocRef,
-                {'description': taskDescController.text, 'isChecked': false});
-          });
+          createTaskModel(taskDescController.text);
           Navigator.pop(context);
         }
       },
@@ -169,6 +163,19 @@ class ConfirmCreateTaskButton extends StatelessWidget {
       ),
     );
   }
+}
+
+// TODO: move this function to services directory:
+/// Add a new document to the db to the `tasks` collection, where the `description` field
+/// is the string `taskDesc`, and the `isChecked` field is false.
+void createTaskModel(String taskDesc) async {
+  await FirebaseFirestore.instance.runTransaction((transaction) async {
+    // Create a reference to a document that doesn't exist yet, it has a random id
+    final newDocRef =
+        await FirebaseFirestore.instance.collection('tasks').doc();
+    // Then write to the new document
+    transaction.set(newDocRef, {'description': taskDesc, 'isChecked': false});
+  });
 }
 
 class TaskListBuilder extends StatelessWidget {
@@ -209,8 +216,10 @@ class TaskTile extends StatelessWidget {
       // Can swipe right to dismiss TaskTile
       key: Key(getCurrDoc(context).reference.hashCode.toString()),
       child: ListTile(title: Text(this.description), leading: Checkbox()),
-      onDismissed: (DismissDirection direction) =>
-          onTaskTileDismissed(context, direction),
+      onDismissed: (DismissDirection direction) => deleteDocument(
+          context,
+          direction,
+          getCurrDoc(context, qsnaplisten: false, idxlisten: false).reference),
       background: Container(
         padding: const EdgeInsets.fromLTRB(0, 0, 24, 0),
         alignment: Alignment.centerRight,
@@ -224,12 +233,11 @@ class TaskTile extends StatelessWidget {
   }
 }
 
-// TODO: factor out into another file
-void onTaskTileDismissed(
-    BuildContext context, DismissDirection direction) async {
+// TODO: factor out into services/
+void deleteDocument(BuildContext context, DismissDirection direction,
+    DocumentReference docRef) async {
   await FirebaseFirestore.instance.runTransaction((transaction) async {
-    await transaction.delete(
-        getCurrDoc(context, qsnaplisten: false, idxlisten: false).reference);
+    await transaction.delete(docRef);
   });
 
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -255,7 +263,8 @@ class Checkbox extends StatelessWidget {
           size: 26,
         ),
       ),
-      onTap: () => onTapCheckbox(context),
+      onTap: () => toggleIsChecked(context,
+          getCurrDoc(context, idxlisten: false, qsnaplisten: false).reference),
     );
     return Container(
       child: gestureDetector,
@@ -263,12 +272,13 @@ class Checkbox extends StatelessWidget {
   }
 }
 
-// TODO: factor this out into a separate file
-void onTapCheckbox(BuildContext context) {
+// TODO: move this to services/
+
+/// Toggle the `isChecked` field of the document `docRef`.
+void toggleIsChecked(BuildContext context, DocumentReference docRef) {
   // https://www.youtube.com/watch?v=DqJ_KjFzL9I
   FirebaseFirestore.instance.runTransaction((transaction) async {
-    DocumentSnapshot freshSnap = await transaction.get(
-        getCurrDoc(context, idxlisten: false, qsnaplisten: false).reference);
+    DocumentSnapshot freshSnap = await transaction.get(docRef);
     await transaction.update(freshSnap.reference, {
       'isChecked': !freshSnap['isChecked'],
     });
@@ -277,7 +287,6 @@ void onTapCheckbox(BuildContext context) {
 
 /// Auxillary function for getting the current document (using the QuesrySnapshot and idx)
 QueryDocumentSnapshot getCurrDoc(BuildContext context,
-    {bool qsnaplisten = true, bool idxlisten = true}) {
-  return Provider.of<QuerySnapshot>(context, listen: qsnaplisten)
-      .docs[Provider.of<int>(context, listen: idxlisten)];
-}
+        {bool qsnaplisten = true, bool idxlisten = true}) =>
+    Provider.of<QuerySnapshot>(context, listen: qsnaplisten)
+        .docs[Provider.of<int>(context, listen: idxlisten)];
