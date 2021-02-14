@@ -36,6 +36,7 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          ImportancePicker(),
           TaskDescField(
             taskDescController: _taskDescController,
           ),
@@ -46,6 +47,58 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
         ],
       ),
     );
+  }
+}
+
+class ImportancePicker extends StatefulWidget {
+  ImportancePicker({Key key}) : super(key: key);
+
+  @override
+  _ImportancePickerState createState() => _ImportancePickerState();
+}
+
+class _ImportancePickerState extends State<ImportancePicker> {
+  int dropdownValue = 4;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+      child: DropdownButton<int>(
+        value: dropdownValue,
+        icon: Icon(Icons.arrow_downward),
+        iconSize: 24,
+        elevation: 16,
+        onChanged: (int newValue) {
+          setState(() {
+            dropdownValue = newValue;
+          });
+        },
+        items: <int>[1, 2, 3, 4].map<DropdownMenuItem<int>>((int value) {
+          return DropdownMenuItem<int>(
+            value: value,
+            child: Container(
+                color: importanceToColor(value), child: Text(value.toString())),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+Color importanceToColor(int val) {
+  switch (val) {
+    case 1:
+      return Colors.red;
+      break;
+    case 2:
+      return Colors.yellow;
+      break;
+    case 3:
+      return Colors.blue;
+      break;
+    default: // 4
+      return Colors.grey;
   }
 }
 
