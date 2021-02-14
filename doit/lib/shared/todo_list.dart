@@ -38,18 +38,76 @@ class FABCreateTask extends StatelessWidget {
       onPressed: () {
         final formKey =
             Provider.of<GlobalKey<FormState>>(context, listen: false);
-        showModalBottomSheet<void>(
+
+        // TODO: when Navigator.pop is called, take the future, and read a string containing what the form had in it
+        showModalBottomSheet<String>(
           context: context,
           builder: (BuildContext context) {
             return Container(
               height: 1000,
               color: Theme.of(context).accentColor,
               alignment: Alignment.center,
-              child: Form(
-                key: formKey,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [],
+              child: Container(
+                alignment: Alignment.topCenter,
+                child: Form(
+                  key: formKey,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Flexible(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                          child: TextFormField(
+                            controller: TextEditingController(),
+                            autofocus: true,
+                            decoration: const InputDecoration(
+                              hintText: "Task Description",
+                            ),
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                return "Please enter some text";
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
+                      FlatButton(
+                        //color: Theme.of(context).accentColor,
+                        minWidth: 30,
+
+                        // TODO: implement writing to db
+                        onPressed: () async {
+                          // Then, later in a transaction:
+
+                          // Validate will return true if the form is valid, or false if
+                          // the form is invalid.
+                          if (formKey.currentState.validate()) {
+                            // await FirebaseFirestore.instance
+                            //     .runTransaction((transaction) async {
+                            //   // Create a reference to a document that doesn't exist yet, it has a random id
+                            //   final newDocRef = await FirebaseFirestore.instance
+                            //       .collection('tasks')
+                            //       .doc();
+                            //   // Then, later in a transaction:
+                            //   transaction.set(newDocRef, {
+                            //     'description': descriptionController.text,
+                            //     'isChecked': false
+                            //   });
+                            //});
+
+                            //descriptionController.text = "";
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: Icon(
+                          Icons.arrow_right_alt,
+                          size: 35,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );
