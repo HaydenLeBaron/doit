@@ -39,81 +39,95 @@ class FABCreateTask extends StatelessWidget {
         final formKey =
             Provider.of<GlobalKey<FormState>>(context, listen: false);
 
-        // TODO: when Navigator.pop is called, take the future, and read a string containing what the form had in it
-        showModalBottomSheet<String>(
+        showModalBottomSheet<void>(
           context: context,
           builder: (BuildContext context) {
             return Container(
               height: 1000,
               color: Theme.of(context).accentColor,
-              alignment: Alignment.center,
-              child: Container(
-                alignment: Alignment.topCenter,
-                child: Form(
-                  key: formKey,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Flexible(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                          child: TextFormField(
-                            controller: TextEditingController(),
-                            autofocus: true,
-                            decoration: const InputDecoration(
-                              hintText: "Task Description",
-                            ),
-                            validator: (value) {
-                              if (value.isEmpty) {
-                                return "Please enter some text";
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ),
-                      FlatButton(
-                        //color: Theme.of(context).accentColor,
-                        minWidth: 30,
-
-                        // TODO: implement writing to db
-                        onPressed: () async {
-                          // Then, later in a transaction:
-
-                          // Validate will return true if the form is valid, or false if
-                          // the form is invalid.
-                          if (formKey.currentState.validate()) {
-                            // await FirebaseFirestore.instance
-                            //     .runTransaction((transaction) async {
-                            //   // Create a reference to a document that doesn't exist yet, it has a random id
-                            //   final newDocRef = await FirebaseFirestore.instance
-                            //       .collection('tasks')
-                            //       .doc();
-                            //   // Then, later in a transaction:
-                            //   transaction.set(newDocRef, {
-                            //     'description': descriptionController.text,
-                            //     'isChecked': false
-                            //   });
-                            //});
-
-                            //descriptionController.text = "";
-                            Navigator.pop(context);
-                          }
-                        },
-                        child: Icon(
-                          Icons.arrow_right_alt,
-                          size: 35,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              alignment: Alignment.topCenter,
+              child: CreateTaskForm(
+                formKey: formKey,
               ),
             );
           },
         );
       },
+    );
+  }
+}
+
+class CreateTaskForm extends StatefulWidget {
+  CreateTaskForm({Key key, @required this.formKey}) : super(key: key);
+
+  final formKey;
+  final taskDescController = TextEditingController();
+
+  @override
+  _CreateTaskFormState createState() => _CreateTaskFormState();
+}
+
+class _CreateTaskFormState extends State<CreateTaskForm> {
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: widget.formKey,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Task Description Field
+          Flexible(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+              child: TextFormField(
+                controller: widget.taskDescController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  hintText: "Task Description",
+                ),
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return "Please enter some text";
+                  }
+                  return null;
+                },
+              ),
+            ),
+          ),
+
+          // Confirm button
+          FlatButton(
+            minWidth: 30,
+            onPressed: () async {
+              // If form is valid
+              if (widget.formKey.currentState.validate()) {
+                await FirebaseFirestore.instance
+                    .runTransaction((transaction) async {
+                  // Create a reference to a document that doesn't exist yet, it has a random id
+                  final newDocRef = await FirebaseFirestore.instance
+                      .collection('tasks')
+                      .doc();
+                  // Then write to the new document
+                  transaction.set(newDocRef, {
+                    'description': widget.taskDescController.text,
+                    'isChecked': false
+                  });
+                });
+
+                widget.taskDescController.text =
+                    ""; // TODO: dispose of controller
+
+                Navigator.pop(context);
+              }
+            },
+            child: Icon(
+              Icons.arrow_right_alt,
+              size: 35,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -227,183 +241,4 @@ QueryDocumentSnapshot getCurrDoc(BuildContext context,
     {bool qsnaplisten = true, bool idxlisten = true}) {
   return Provider.of<QuerySnapshot>(context, listen: qsnaplisten)
       .docs[Provider.of<int>(context, listen: idxlisten)];
-}
-
-// TODO: BKMRK: Implement ability to add new by pressing the FAB. Do this in tasks_screen.dart, using provider
-
-// Old code below //////////////////////////////////////////////////////
-
-class TodoList extends StatefulWidget {
-  TodoList({Key key}) : super(key: key);
-
-  @override
-  _TodoListState createState() => _TodoListState();
-}
-
-class _TodoListState extends State<TodoList> {
-  final _formKey = GlobalKey<FormState>();
-  final descriptionController = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: StreamBuilder(
-          stream: FirebaseFirestore.instance.collection("tasks").snapshots(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) return const Text('TodoList Loading...');
-            return ListView.builder(
-              itemCount: snapshot.data.docs.length,
-              itemBuilder: (BuildContext context, int idx) {
-                var document = snapshot.data.docs[idx];
-                return Dismissible(
-                  background: Container(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 24, 0),
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: Icon(
-                            Icons.delete,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      color: Colors.red),
-                  key: Key(
-                      snapshot.data.docs[idx].reference.hashCode.toString()),
-                  onDismissed: (direction) async {
-                    await FirebaseFirestore.instance
-                        .runTransaction((transaction) async {
-                      await transaction
-                          .delete(snapshot.data.docs[idx].reference);
-                    });
-
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text("Task deleted"),
-                      duration: Duration(milliseconds: 300),
-                    ));
-                  },
-                  child: ListTile(
-                      leading: GestureDetector(
-                        child: Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Icon(
-                            document['isChecked']
-                                ? Icons.check_box
-                                : Icons.check_box_outline_blank,
-                            size: 26,
-                          ),
-                        ),
-                        onTap: () {
-                          // https://www.youtube.com/watch?v=DqJ_KjFzL9I
-                          FirebaseFirestore.instance
-                              .runTransaction((transaction) async {
-                            DocumentSnapshot freshSnap =
-                                await transaction.get(document.reference);
-                            await transaction.update(freshSnap.reference, {
-                              'isChecked': !freshSnap['isChecked'],
-                            });
-                          });
-                        },
-                      ),
-                      title: Text(document['description']),
-                      tileColor: Theme.of(context).accentColor),
-                );
-              },
-            );
-          }),
-      floatingActionButton: FloatingActionButton(
-        // TODO: refactor so that the FAB is part of the screen and not the todolist
-        backgroundColor: Theme.of(context).primaryColor,
-        child: Icon(
-          Icons.add,
-          color: Theme.of(context).accentColor,
-        ),
-        onPressed: () {
-          // Input task
-          showModalBottomSheet<void>(
-            context: context,
-            builder: (BuildContext context) {
-              return Container(
-                height: 1000,
-                color: Theme.of(context).accentColor,
-                child: Center(
-                  // CREATE TASK FORM // ---------------------------------------
-                  child: Scaffold(
-                    body: Form(
-                      key: _formKey,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Flexible(
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                              child: TextFormField(
-                                controller: descriptionController,
-                                autofocus: true,
-                                decoration: const InputDecoration(
-                                  hintText: "Task Description",
-                                ),
-                                validator: (value) {
-                                  if (value.isEmpty) {
-                                    return "Please enter some text";
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                          ),
-
-                          // Finish creating task button
-                          StreamBuilder(
-                              stream: FirebaseFirestore.instance
-                                  .collection("tasks")
-                                  .snapshots(),
-                              builder: (context, snapshot) {
-                                return FlatButton(
-                                  //color: Theme.of(context).accentColor,
-                                  minWidth: 30,
-                                  onPressed: () async {
-                                    // Then, later in a transaction:
-
-                                    // Validate will return true if the form is valid, or false if
-                                    // the form is invalid.
-                                    if (_formKey.currentState.validate()) {
-                                      await FirebaseFirestore.instance
-                                          .runTransaction((transaction) async {
-                                        // Create a reference to a document that doesn't exist yet, it has a random id
-                                        final newDocRef =
-                                            await FirebaseFirestore.instance
-                                                .collection('tasks')
-                                                .doc();
-                                        // Then, later in a transaction:
-                                        transaction.set(newDocRef, {
-                                          'description':
-                                              descriptionController.text,
-                                          'isChecked': false
-                                        });
-                                      });
-
-                                      descriptionController.text = "";
-                                      await Navigator.pop(context);
-                                    }
-                                  },
-                                  child: Icon(
-                                    Icons.arrow_right_alt,
-                                    size: 35,
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                );
-                              }),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
 }
