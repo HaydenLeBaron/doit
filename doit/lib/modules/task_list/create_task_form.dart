@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:doit/services/tasks_service.dart';
 import 'package:doit/modules/task_list/helpers.dart';
+import 'package:doit/modules/task_list/importance_picker.dart';
 
 class CreateTaskForm extends StatefulWidget {
   CreateTaskForm({Key key, @required this.formKey}) : super(key: key);
@@ -9,14 +10,6 @@ class CreateTaskForm extends StatefulWidget {
 
   @override
   _CreateTaskFormState createState() => _CreateTaskFormState();
-}
-
-class ImportancePickerController {
-  int importance;
-
-  ImportancePickerController(startingImportance) {
-    importance = startingImportance;
-  }
 }
 
 class _CreateTaskFormState extends State<CreateTaskForm> {
@@ -58,43 +51,6 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
             formKey: widget.formKey,
           )
         ],
-      ),
-    );
-  }
-}
-
-class ImportancePicker extends StatefulWidget {
-  ImportancePicker({Key key, @required this.controller}) : super(key: key);
-
-  final ImportancePickerController controller;
-
-  @override
-  _ImportancePickerState createState() => _ImportancePickerState();
-}
-
-class _ImportancePickerState extends State<ImportancePicker> {
-  @override
-  Widget build(BuildContext context) {
-    int dropdownValue = widget.controller.importance;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-      child: DropdownButton<int>(
-        value: dropdownValue,
-        icon: Icon(Icons.arrow_downward),
-        iconSize: 24,
-        elevation: 16,
-        onChanged: (int newValue) {
-          setState(() {
-            widget.controller.importance = newValue;
-          });
-        },
-        items: <int>[1, 2, 3, 4].map<DropdownMenuItem<int>>((int value) {
-          return DropdownMenuItem<int>(
-            value: value,
-            child: Container(
-                color: importanceToColor(value), child: Text(value.toString())),
-          );
-        }).toList(),
       ),
     );
   }

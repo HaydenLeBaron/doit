@@ -23,3 +23,11 @@ Color importanceToColor(int val) {
       return Colors.grey;
   }
 }
+
+class ImportancePickerController {
+  int importance;
+
+  ImportancePickerController(startingImportance) {
+    importance = startingImportance;
+  }
+}
