@@ -15,7 +15,7 @@ class DoitApp extends StatelessWidget {
     return MaterialApp(
       title: 'Do It',
       theme: ThemeData(
-        primaryColor: Colors.blueGrey,
+        primaryColor: Colors.grey,
         accentColor: Colors.white,
       ),
       home: FutureBuilder(
