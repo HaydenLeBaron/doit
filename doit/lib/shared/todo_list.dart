@@ -92,57 +92,80 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Task Description Field
-          Flexible(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-              child: TextFormField(
-                controller: _taskDescController,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: "Task Description",
-                ),
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return "Please enter some text";
-                  }
-                  return null;
-                },
-              ),
-            ),
+          // Task Description Field ----------------------
+          TaskDescField(
+            taskDescController: _taskDescController,
           ),
 
-          // Confirm button
-          FlatButton(
-            minWidth: 30,
-            onPressed: () async {
-              // If form is valid
-              if (widget.formKey.currentState.validate()) {
-                await FirebaseFirestore.instance
-                    .runTransaction((transaction) async {
-                  // Create a reference to a document that doesn't exist yet, it has a random id
-                  final newDocRef = await FirebaseFirestore.instance
-                      .collection('tasks')
-                      .doc();
-                  // Then write to the new document
-                  transaction.set(newDocRef, {
-                    'description': _taskDescController.text,
-                    'isChecked': false
-                  });
-                });
-
-                //_taskDescController.text = ""; // TODO: dispose of controller
-
-                Navigator.pop(context);
-              }
-            },
-            child: Icon(
-              Icons.arrow_right_alt,
-              size: 35,
-              color: Theme.of(context).primaryColor,
-            ),
-          ),
+          // Confirm button --------------------------------
+          ConfirmCreateTaskButton(
+            taskDescController: _taskDescController,
+            formKey: widget.formKey,
+          )
         ],
+      ),
+    );
+  }
+}
+
+class TaskDescField extends StatelessWidget {
+  const TaskDescField({Key key, @required this.taskDescController})
+      : super(key: key);
+  final TextEditingController taskDescController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Flexible(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+        child: TextFormField(
+          controller: taskDescController,
+          autofocus: true,
+          decoration: const InputDecoration(
+            hintText: "Task Description",
+          ),
+          validator: (value) {
+            if (value.isEmpty) {
+              return "Please enter some text";
+            }
+            return null;
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class ConfirmCreateTaskButton extends StatelessWidget {
+  const ConfirmCreateTaskButton(
+      {Key key, @required this.taskDescController, @required this.formKey})
+      : super(key: key);
+
+  final TextEditingController taskDescController;
+  final GlobalKey<FormState> formKey;
+
+  @override
+  Widget build(BuildContext context) {
+    return FlatButton(
+      minWidth: 30,
+      onPressed: () async {
+        // If form is valid
+        if (formKey.currentState.validate()) {
+          await FirebaseFirestore.instance.runTransaction((transaction) async {
+            // Create a reference to a document that doesn't exist yet, it has a random id
+            final newDocRef =
+                await FirebaseFirestore.instance.collection('tasks').doc();
+            // Then write to the new document
+            transaction.set(newDocRef,
+                {'description': taskDescController.text, 'isChecked': false});
+          });
+          Navigator.pop(context);
+        }
+      },
+      child: Icon(
+        Icons.arrow_right_alt,
+        size: 35,
+        color: Theme.of(context).primaryColor,
       ),
     );
   }
