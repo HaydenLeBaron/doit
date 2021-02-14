@@ -10,18 +10,19 @@ class TaskListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: convert into MultiProvider pattern
-    return StreamProvider<QuerySnapshot>(
-      create: getTasksQuerySnapshotStream,
-      child: Provider<GlobalKey<FormState>>(
-        create: (context) => GlobalKey<FormState>(),
-        child: Scaffold(
-          appBar: AppBar(
-            title: Text("To Do"),
-          ),
-          body: TaskListBuilder(),
-          floatingActionButton: FABCreateTask(),
+    return MultiProvider(
+      providers: [
+        StreamProvider<QuerySnapshot>(create: getTasksQuerySnapshotStream),
+        Provider<GlobalKey<FormState>>(
+          create: (context) => GlobalKey<FormState>(),
+        )
+      ],
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("To Do"),
         ),
+        body: TaskListBuilder(),
+        floatingActionButton: FABCreateTask(),
       ),
     );
   }

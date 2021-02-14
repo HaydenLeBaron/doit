@@ -41,7 +41,6 @@ class TaskTile extends StatelessWidget {
   }
 }
 
-// TODO: try to convert to a regular Checkbox and see if it is more performant
 class TaskCheckbox extends StatelessWidget {
   const TaskCheckbox({
     Key key,

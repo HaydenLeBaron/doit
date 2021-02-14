@@ -9,7 +9,7 @@ Stream<QuerySnapshot> getTasksQuerySnapshotStream(BuildContext context) =>
 void deleteDocument(BuildContext context, DismissDirection direction,
     DocumentReference docRef) async {
   await FirebaseFirestore.instance.runTransaction((transaction) async {
-    await transaction.delete(docRef);
+    transaction.delete(docRef);
   });
 }
 
@@ -18,7 +18,7 @@ void toggleIsChecked(BuildContext context, DocumentReference docRef) {
   // https://www.youtube.com/watch?v=DqJ_KjFzL9I
   FirebaseFirestore.instance.runTransaction((transaction) async {
     DocumentSnapshot freshSnap = await transaction.get(docRef);
-    await transaction.update(freshSnap.reference, {
+    transaction.update(freshSnap.reference, {
       'isChecked': !freshSnap['isChecked'],
     });
   });
@@ -29,8 +29,7 @@ void toggleIsChecked(BuildContext context, DocumentReference docRef) {
 void createTaskModel(String taskDesc) async {
   await FirebaseFirestore.instance.runTransaction((transaction) async {
     // Create a reference to a document that doesn't exist yet, it has a random id
-    final newDocRef =
-        await FirebaseFirestore.instance.collection('tasks').doc();
+    final newDocRef = FirebaseFirestore.instance.collection('tasks').doc();
     // Then write to the new document
     transaction.set(newDocRef, {'description': taskDesc, 'isChecked': false});
   });
