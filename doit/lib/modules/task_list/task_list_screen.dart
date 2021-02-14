@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 
+// TODO: BKMRK: move everything in this file around to an appropriate file
+
 class TaskListScreen extends StatelessWidget {
   const TaskListScreen({Key key}) : super(key: key);
 
@@ -93,12 +95,9 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Task Description Field ----------------------
           TaskDescField(
             taskDescController: _taskDescController,
           ),
-
-          // Confirm button --------------------------------
           ConfirmCreateTaskButton(
             taskDescController: _taskDescController,
             formKey: widget.formKey,

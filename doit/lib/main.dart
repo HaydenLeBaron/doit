@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:doit/shared/todo_list.dart';
-import 'package:doit/screens/loading_screen.dart';
-import 'package:doit/screens/something_went_wrong_screen.dart';
+import 'package:doit/modules/task_list/task_list_screen.dart';
+import 'package:doit/shared/loading_screen.dart';
+import 'package:doit/shared/something_went_wrong_screen.dart';
 
 void main() {
   //TestWidgetsFlutterBinding.ensureInitialized()
